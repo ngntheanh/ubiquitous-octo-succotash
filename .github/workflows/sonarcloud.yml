@@ -1,0 +1,38 @@
+name: SonarQube Scan
+
+# Chạy hành động này khi có thay đổi trên nhánh main hoặc pull request vào main
+on:
+  push:
+    branches:
+      - main  # Hoặc branch bạn muốn quét
+  pull_request:
+    branches:
+      - main  # Hoặc branch bạn muốn quét
+
+jobs:
+  sonarQubeScan:
+    name: SonarQube Scan
+    runs-on: ubuntu-latest  # Chạy trên môi trường Ubuntu mới nhất
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2  # Lấy mã nguồn từ kho GitHub
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2  # Cài đặt JDK 11
+        with:
+          java-version: '11'
+
+      - name: Cache SonarQube dependencies
+        uses: actions/cache@v2  # Lưu bộ nhớ đệm SonarQube để giảm thời gian tải xuống
+        with:
+          path: ~/.sonar  # Đường dẫn bộ nhớ đệm
+          key: ${{ runner.os }}-sonar-cache  # Khóa bộ nhớ đệm
+          restore-keys: |
+            ${{ runner.os }}-sonar-cache
+
+      - name: Run SonarQube Scanner
+        uses: sonarsource/sonarcloud-github-action@v1.1  # Sử dụng hành động SonarQube chính thức
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}  # Sử dụng token từ GitHub Secrets
+          sonar-host-url: ${{ secrets.SONAR_HOST_URL }}  # Sử dụng URL của SonarQube từ GitHub Secrets
